@@ -1,0 +1,47 @@
+/* Sanal deneyler: kaydırıcılarla değişkenleri değiştir, sonucu anında gör (veri: unit.deneyler = ["dinamo","ay","surtunme" | "tutulma","yansima","surat"]) */
+(() => {
+  const tx = (x, y, t, s = 12, a = "middle") => `<text x="${x}" y="${y}" text-anchor="${a}" font-size="${s}" fill="currentColor">${t}</text>`;
+  const ar = (a, b, y, c, t) => { const d = b > a ? 1 : -1; return `<line x1="${a}" y1="${y}" x2="${b - 8 * d}" y2="${y}" stroke="${c}" stroke-width="5"/><polygon points="${b},${y} ${b - 12 * d},${y - 8} ${b - 12 * d},${y + 8}" fill="${c}"/>` + tx((a + b) / 2, y - 10, t, 13); };
+  const SV = (id, vb) => `<svg id="${id}" viewBox="${vb}" style="width:100%;max-width:520px;height:auto;color:var(--yazi)"></svg>`;
+  const LABS = {
+    dinamo: { ad: "⚖️ Sanal Dinamometre", h: `<p>Yay: <select id="yy"><option value="10">İnce yay (en çok 10 N)</option><option value="50">Kalın yay (en çok 50 N)</option></select></p><p>Asılan kütle: <b id="km"></b> g <input id="ks" type="range" min="0" max="5000" step="100" value="0"></p>${SV("sv", "0 0 300 300")}<p id="rd" class="geri-bildirim"></p>`,
+      up(q) { const mx = +q("#yy").value, g = +q("#ks").value, w = g / 100, y = 50 + Math.min(w / mx, 1.15) * 150; q("#km").textContent = g; let p = "", tk = "";
+        for (let k = 0; k <= 12; k++) p += (150 + (k ? (k % 2 ? 12 : -12) : 0)) + "," + (10 + (y - 10) * k / 12) + " ";
+        for (let i = 0; i <= 10; i++) tk += `<line x1="215" x2="225" y1="${50 + i * 15}" y2="${50 + i * 15}" stroke="currentColor"/>` + tx(232, 54 + i * 15, mx * i / 10, 11, "start");
+        q("#sv").innerHTML = `<line x1="150" y1="0" x2="150" y2="10" stroke="currentColor" stroke-width="3"/><polyline points="${p}" fill="none" stroke="#2e8b57" stroke-width="3"/>${tk}<line x1="140" x2="215" y1="${y}" y2="${y}" stroke="#d1493f" stroke-width="2"/><rect x="${150 - (28 + g / 100) / 2}" y="${y}" width="${28 + g / 100}" height="${14 + g / 100}" rx="4" fill="#f5b335"/>`;
+        q("#rd").innerHTML = w > mx ? "⚠️ Yay zorlandı! Daha kalın yaylı dinamometre seç." : `Okunan değer: <b>${w} N</b> (${g / 1000} kg kütlenin ağırlığı; ağırlık ≈ kütle × 10 N/kg)`; } },
+    ay: { ad: "🌗 Ay Evreleri Laboratuvarı", h: `<p>Ay’ı Dünya’nın etrafında döndür. Güneş ışığı soldan geliyor.</p><input id="as" type="range" min="0" max="359" value="0">${SV("sv", "0 0 520 220")}<p id="rd" class="geri-bildirim"></p>`,
+      up(q) { const a = +q("#as").value, c = Math.cos(a * Math.PI / 180), mx = 130 - 75 * c, my = 110 + 75 * Math.sin(a * Math.PI / 180),
+          n = a < 10 || a > 350 ? "Yeni ay" : a < 80 || a > 280 ? "Hilal" : a < 100 ? "İlk dördün" : a < 170 ? "Şişkin ay" : a < 190 ? "Dolunay" : a < 260 ? "Şişkin ay" : "Son dördün";
+        q("#sv").innerHTML = `<text x="2" y="118" font-size="34">☀️</text><circle cx="130" cy="110" r="75" fill="none" stroke="currentColor" stroke-dasharray="4" opacity=".4"/><circle cx="130" cy="110" r="15" fill="#3b82f6"/><circle cx="${mx}" cy="${my}" r="11" fill="#555"/><path d="M${mx} ${my - 11}A11 11 0 0 0 ${mx} ${my + 11}Z" fill="#ffe9a0"/>${tx(400, 38, "Dünya’dan görünüş", 13)}<circle cx="400" cy="110" r="55" fill="#333"/><path d="M400 55A55 55 0 0 ${a <= 180 ? 1 : 0} 400 165Z" fill="#ffe9a0"/><ellipse cx="400" cy="110" rx="${55 * Math.abs(c)}" ry="55" fill="${c > 0 ? "#333" : "#ffe9a0"}"/>`;
+        q("#rd").innerHTML = `Evre: <b>${n}</b> · Dolanma günü: ${(a / 360 * 29.5).toFixed(1)} / 29,5`; } },
+    surtunme: { ad: "🛷 Sürtünme Rampası", h: `<p>5 kg’lık kutuyu (ağırlığı 50 N) it. Yüzeyi seç, yağla, itme kuvvetini ayarla.</p><p><select id="zy"><option value="0.1">Buz</option><option value="0.2">Cilalı zemin</option><option value="0.4" selected>Ahşap</option><option value="0.6">Halı</option><option value="0.8">Zımpara</option></select> <label><input type="checkbox" id="yg"> Yağla</label></p><p>İtme kuvveti: <b id="pv"></b> N <input id="ps" type="range" min="0" max="50" value="0"></p><div class="gorsel" style="text-align:left;overflow:hidden"><span id="bx" style="display:inline-block;font-size:2.4rem;transition:margin .3s">📦</span></div><p id="rd" class="geri-bildirim"></p>`,
+      up(q) { const f = Math.round(+q("#zy").value * (q("#yg").checked ? .5 : 1) * 500) / 10, p = +q("#ps").value, mv = p > f, net = mv ? Math.round((p - f) * 10) / 10 : 0;
+        q("#pv").textContent = p; q("#bx").style.marginLeft = Math.min(net / 50 * 85, 85) + "%";
+        q("#rd").innerHTML = `Sürtünme kuvveti: <b>${mv ? f : p} N</b> (itmenin tersi yönde) · Net kuvvet: <b>${net} N</b><br>${mv ? "📦 Kutu hareket ediyor." : "📦 Kutu duruyor: sürtünme itmeyi dengeliyor."}${q("#yg").checked ? " 🛢️ Yağ sürtünmeyi azalttı." : ""}`; } },
+    tutulma: { ad: "🌘 Tutulma Laboratuvarı", h: `<p>Ay’ı Dünya’nın etrafında döndür. Güneş ışığı soldan geliyor.</p><input id="as" type="range" min="0" max="359" value="90">${SV("sv", "0 0 520 220")}<p id="rd" class="geri-bildirim"></p>`,
+      up(q) { const a = +q("#as").value, r = a * Math.PI / 180, mx = 130 - 75 * Math.cos(r), my = 110 + 75 * Math.sin(r), g = a < 8 || a > 352, l = a > 172 && a < 188;
+        q("#sv").innerHTML = `<text x="2" y="118" font-size="34">☀️</text><circle cx="130" cy="110" r="75" fill="none" stroke="currentColor" stroke-dasharray="4" opacity=".4"/><polygon points="145,100 330,106 330,114 145,120" fill="#000" opacity=".25"/><circle cx="130" cy="110" r="15" fill="#3b82f6"/>${g ? `<polygon points="${mx},${my - 7} ${mx + 75},${my} ${mx},${my + 7}" fill="#000" opacity=".4"/>` : ""}<circle cx="${mx}" cy="${my}" r="9" fill="${l ? "#a33" : "#bbb"}"/>`;
+        q("#rd").innerHTML = g ? "🌑 <b>Yeni ay:</b> Ay, Güneş ile Dünya’nın arasında. Ay’ın gölgesi Dünya’ya düşüyor → <b>Güneş tutulması</b>!" : l ? "🌕 <b>Dolunay:</b> Ay, Dünya’nın gölgesine girdi → <b>Ay tutulması</b>!" : "Tutulma yok. Ay’ı yeni ay (0°) ya da dolunay (180°) konumuna getir."; } },
+    yansima: { ad: "💡 Işık Yansıması Deneyi", h: `<p>Yüzey: <select id="yz"><option value="0">Düz ayna (pürüzsüz)</option><option value="1">Buruşuk folyo (pürüzlü)</option></select></p><p>Gelme açısı: <b id="av"></b>° <input id="ag" type="range" min="0" max="80" value="40"></p>${SV("sv", "0 0 300 190")}<p id="rd" class="geri-bildirim"></p>`,
+      up(q) { const a = +q("#ag").value, p = +q("#yz").value, x0 = 150, y0 = 150, pt = t => [x0 + 120 * Math.sin(t), y0 - 120 * Math.cos(t)], i = pt(-a * Math.PI / 180), o = pt(a * Math.PI / 180); q("#av").textContent = a;
+        const out = p ? [-60, -25, 20, 55].map(d => { const z = pt(d * Math.PI / 180); return `<line x1="${x0}" y1="${y0}" x2="${z[0]}" y2="${z[1]}" stroke="#f5b335" stroke-width="2"/>`; }).join("") : `<line x1="${x0}" y1="${y0}" x2="${o[0]}" y2="${o[1]}" stroke="#f5b335" stroke-width="3"/>`;
+        q("#sv").innerHTML = (p ? `<polyline points="20,150 40,156 60,150 80,156 100,150 120,156 140,150 160,156 180,150 200,156 220,150 240,156 260,150 280,156" fill="none" stroke="currentColor" stroke-width="4"/>` : `<line x1="20" y1="150" x2="280" y2="150" stroke="currentColor" stroke-width="5"/>`) + `<line x1="150" y1="20" x2="150" y2="150" stroke="currentColor" stroke-dasharray="4" opacity=".6"/><line x1="${i[0]}" y1="${i[1]}" x2="${x0}" y2="${y0}" stroke="#f5b335" stroke-width="3"/>${out}` + tx(158, 18, "normal", 11, "start");
+        q("#rd").innerHTML = p ? "Pürüzlü yüzeyde ışınlar farklı yönlere dağılır: <b>dağınık yansıma</b>." : `Gelme açısı = <b>${a}°</b>, yansıma açısı = <b>${a}°</b> (<b>düzgün yansıma</b>)`; } },
+    surat: { ad: "🏎️ Sürat ve Hız Hesaplayıcı", h: `<p>Yön: <select id="dn"><option>doğu</option><option>batı</option></select></p><p>Alınan yol: <b id="yv"></b> m <input id="yl" type="range" min="10" max="200" step="10" value="100"></p><p>Geçen süre: <b id="sx"></b> s <input id="st" type="range" min="1" max="20" value="10"></p><div class="gorsel" style="text-align:left;overflow:hidden"><span id="cr" style="display:inline-block;font-size:2rem;transition:margin .4s">🚗</span></div><p id="rd" class="geri-bildirim"></p>`,
+      up(q) { const y = +q("#yl").value, t = +q("#st").value, v = Math.round(y / t * 10) / 10, k = Math.round(v * 36) / 10; q("#yv").textContent = y; q("#sx").textContent = t; q("#cr").style.marginLeft = Math.min(v / 20 * 85, 85) + "%";
+        q("#rd").innerHTML = `Sürat = ${y} m ÷ ${t} s = <b>${v} m/s</b> (${k} km/h)<br>Hız = <b>${v} m/s, ${q("#dn").value} yönünde</b> (hız, süratin yönle birlikte söylenmesidir)`; } }
+  };
+  Games.lab = {
+    ad: "Sanal Deneyler", ikon: "🧪", acik: "Kaydırıcılarla dene, sonucu anında gör.", uygun: (u) => !!u.deneyler,
+    start(ctx) {
+      const { el } = UI, root = ctx.root, liste = ctx.unit.deneyler;
+      const menu = () => root.replaceChildren(el("div", { class: "kart" }, el("h2", {}, "🧪 Hangi deneyi yapalım?"), el("div", { class: "oyun-liste" }, liste.map(id => el("button", { class: "oyun-kart", onclick: () => ac(id) }, el("div", { class: "oyun-ad" }, LABS[id].ad))))));
+      const ac = (id) => { const L = LABS[id], kutu = el("div", { class: "kart lab-kutu", html: `<h2>${L.ad}</h2>${L.h}` }), q = (s) => kutu.querySelector(s);
+        kutu.addEventListener("input", () => L.up(q));
+        root.replaceChildren(kutu, el("div", { class: "alt-cubuk" }, el("button", { class: "btn ikinci", onclick: menu }, "◀ Deney listesi"),
+          el("button", { class: "btn buyuk", onclick: () => ctx.bitir({ dogru: 1, toplam: 1, puan: 15, yanlis: [], ozet: `Deneyi tamamladın: ${L.ad}` }) }, "✔ Deneyi bitir"))); L.up(q); };
+      menu();
+    }
+  };
+})();

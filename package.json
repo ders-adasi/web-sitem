@@ -1,0 +1,8 @@
+{
+  "name": "ders-ormani",
+  "version": "3.0.0",
+  "private": true,
+  "description": "Ders Ormanı – 5. ve 6. sınıf için oyunla öğrenme sitesi (derlemesiz, statik)",
+  "scripts": { "kontrol": "node tools/kontrol.js", "test": "node tools/kontrol.js && node tools/duman-testi.js", "sunucu": "npx serve ." },
+  "devDependencies": { "jsdom": "^24.0.0" }
+}
